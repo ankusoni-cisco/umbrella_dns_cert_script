@@ -1,1 +1,75 @@
 # Umbrella_dns_cert_script
+
+Issue: 
+    The SSL digital certificate that is used by Cisco Catalyst SD-WAN Routers to register with Cisco Umbrella DNS expired on September 30, 2024. Cisco SD-WAN Routers with the expired certificate will fail to register with the Cisco Umbrella DNS service. The result of this failure is that all subsequent client DNS requests will not be redirected to Umbrella. 
+ 
+Remediation: 
+
+1. Manual steps: 
+     Field notice - https://www.cisco.com/c/en/us/support/docs/field-notices/741/fn74166.html  
+
+2. Automation through script: 
+
+      Script - script_for_umbrella_rootca.tar.gz
+
+      This script is to copy the Umbrella rootCA to all edge routers from vManage through system IP connection. Script does the following steps: 
+         a.  Fetch all connected reachable routers from vManage.      
+         b.  Ssh to edge router  and copy new Umbrella rootCA to /bootflash/sdwan/trustidrootx3_ca_062035.ca 
+         c.  Copy root CA file from /bootflash/sdwan/trustidrootx3_ca_062035.ca to bootflash:trustidrootx3_ca_092024.ca 
+
+ 
+
+      This zipped file has four files  
+        a.  fetch_connected_devices.py - this script fetches all connected routers system IP and writes it to a csv file (hosts.csv) 
+        b.  umbrella_rootca_script.py. - this script copies and updates the CA for routers 
+        c.  trustidrootx3_ca_062035.ca - new root CA file 
+        d.  host.csv - file with system ip, username and password in comma separated format (for sample format) 
+
+      Note:   This script works only on single tenant vManage and for vManage version 20.9.x and above.. For cluster deployment, this script has to be run on each vManage node in the cluster. 
+
+Steps to run script: 
+
+      a.   Copy this tar.gz file to vManage path /home/admin/ 
+
+      b.   Ssh to vManage with admin access 
+
+      c.   Enter vshell  
+
+      d.   Unzip the file: tar -xvf /home/admin/script_for_umbrella_rootca.tar.gz 
+
+      e.   Run the fetch_connected_devices.py with providing vManage username and password 
+
+           python3 fetch_connected_devices.py -u <username> -p <password> 
+
+      f.  Once fetch_connected_devices.py is run, it will create a  csv file (reachable_hosts.csv) with all connected and reachable routers system IP.  Sample output of hosts.csv is below. 
+
+           vManage:~/script_for_umbrella_rootca# cat reachable_hosts.csv  
+           host,username,password 
+           172.16.255.15,, 
+           172.16.255.14,, 
+           vManage:~/script_for_umbrella_rootca# 
+
+          Also above script will create a csv file "unreachable_hosts.csv" if any routers are in unreachable state. 
+
+       g. User has to manually update reachable_hosts.csv file with username and password for each router. Sample output of reachable_hosts.csv is below. 
+
+            vManage:~/script_for_umbrella_rootca# cat reachable_hosts.csv 
+            host,username,password 
+            172.16.255.15,admin,password123 
+            172.16.255.14,admin,pwd12345 
+            vManage:~/script_for_umbrella_rootca# 
+
+       h.   Run the root ca update script using following command with right vManage version in the command 
+
+            python3 umbrella_rootca_script.py -c reachable_hosts.csv -v 20.12.3 
+
+       i.  Once the script is run, it will display the results about how many routers are successfully updated and failed. At the end of the run, script will generate failed_routers.csv which will contain system ip of all failed routers.  
+
+       j.  If the username and password is same for all the routers, instead of repeating the username and password for all routers in csv, script can be run with args -u (for username) and -p (for password). CSV file can just have router system IP without username and password. 
+
+            python3 umbrella_rootca_script.py -c reachable_hosts.csv -v 20.12.3  -u <username> -p <password> 
+       k.  For failed device, it will generate a CSV file which can be used at later point when devices are reachable.
+
+POST CHECK: 
+  If router already hit the DNS registration issue with the expired certificate, then after running the script, please check the umbrella registration on cedge through "show sdwan umbrella device-registration". 
+
