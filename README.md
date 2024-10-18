@@ -12,6 +12,8 @@ Remediation:
 
  2.  Automation through script: 
 
+      NOTE : USE admin credentials for edge devices 
+
       Script - script_for_umbrella_rootca.tar.gz.   
 
         This script is to copy the Umbrella rootCA to all edge routers from vManage through system IP connection. Script does the following steps: 
