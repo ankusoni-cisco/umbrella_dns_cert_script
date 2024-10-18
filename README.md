@@ -72,7 +72,6 @@ Steps to run script:
        j.   If the username and password is same for all the routers, instead of repeating the username and password for all routers in csv, script can be run with args –u (for username) and –p (for password). CSV file can just have router system IP without username and password. 
 
                python3 umbrella_rootca_script.py -c reachable_hosts.csv -v 20.12.3 -u <router-username> –p <router-password> 
-       k.  For failed device, it will generate a CSV file which can be used at later point when devices are reachable.
 
 POST CHECK: 
 
