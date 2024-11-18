@@ -75,6 +75,33 @@ Steps to run script:
 
                python3 umbrella_rootca_script.py -c reachable_hosts.csv -v 20.12.3 -u <router-username> –p <router-password> 
 
+If you feel that time updating the certificate is taking longer time, we can break the device list in multiples of 100s and can run the script in background. 
+
+Once you get reachable_hosts.csv, run below commands:
+
+This will create 5 CSV files containing 100 devices each: 
+
+head -n 1 reachable_hosts.csv > size1.csv
+tail -n +2 reachable_hosts.csv | head -n 100 >> size1.csv
+head -n 1 reachable_hosts.csv > size2.csv
+tail -n +101 reachable_hosts.csv | head -n 100 >> size2.csv
+head -n 1 reachable_hosts.csv > size3.csv
+tail -n +201 reachable_hosts.csv | head -n 100 >> size3.csv
+head -n 1 reachable_hosts.csv > size4.csv
+tail -n +301 reachable_hosts.csv | head -n 100 >> size4.csv
+head -n 1 reachable_hosts.csv > size5.csv
+tail -n +401 reachable_hosts.csv | head -n 100 >> size5.csv
+
+python3 umbrella_rootca_script.py -c size1.csv -v <vManage_version> -u <router_username> -p <router_password> > output_1.log 2>&1 &
+python3 umbrella_rootca_script.py -c size2.csv -v <vManage_version> -u <router_username> -p <router_password> > output_2.log 2>&1 &
+python3 umbrella_rootca_script.py -c size3.csv -v <vManage_version> -u <router_username> -p <router_password> > output_3.log 2>&1 &
+python3 umbrella_rootca_script.py -c size4.csv -v <vManage_version> -u <router_username> -p <router_password> > output_4.log 2>&1 &
+python3 umbrella_rootca_script.py -c size5.csv -v <vManage_version> -u <router_username> -p <router_password> > output_5.log 2>&1 &
+
+You can check the process to see if its running:
+
+ps -ef | grep size
+
 POST CHECK: 
 
     If router already hit the DNS registration issue with the expired certificate, then after running the script, please check the umbrella registration on cedge through “show sdwan umbrella device-registration".  
