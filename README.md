@@ -81,6 +81,7 @@ Once you get reachable_hosts.csv, run below commands:
 
 This will create 5 CSV files containing 100 devices each: 
 
+```
 head -n 1 reachable_hosts.csv > size1.csv
 tail -n +2 reachable_hosts.csv | head -n 100 >> size1.csv
 head -n 1 reachable_hosts.csv > size2.csv
@@ -101,6 +102,7 @@ python3 umbrella_rootca_script.py -c size5.csv -v <vManage_version> -u <router_u
 You can check the process to see if its running:
 
 ps -ef | grep size
+```
 
 POST CHECK: 
 
